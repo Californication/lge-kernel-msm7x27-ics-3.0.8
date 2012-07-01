@@ -342,6 +342,13 @@ config BACKLIGHT_LM3530
 	help
 	  If you have a National Semiconductor LM3530, say Y to enable the backlight driver
 
+config BACKLIGHT_RT9393
+	tristate "RT9393 Backlight Driver "
+	depends on BACKLIGHT_CLASS_DEVICE
+	default n
+	help
+	  If you have a RT9393, say y to enable the backlight driver
+
 config BACKLIGHT_AAT2870
 	tristate "AAT2870 Backlight Driver "
 	depends on BACKLIGHT_CLASS_DEVICE
