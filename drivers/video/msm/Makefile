@@ -112,6 +112,8 @@ obj-$(CONFIG_FB_MSM_MDDI_TOSHIBA_WVGA) += mddi_toshiba_wvga.o
 obj-$(CONFIG_FB_MSM_MDDI_SHARP_QVGA_128x128) += mddi_sharp.o
 obj-$(CONFIG_FB_MSM_MDDI_ORISE) += mddi_orise.o
 obj-$(CONFIG_FB_MSM_MDDI_QUICKVX) += mddi_quickvx.o
+obj-$(CONFIG_FB_MSM_MDDI_SAMSUNG_COMMON) += mddi_samsung.o
+obj-$(CONFIG_FB_MSM_MDDI_SAMSUNG_INNOTEK_HVGA) += mddi_samsung_innotek_hvga.o
 endif
 
 ifeq ($(CONFIG_FB_MSM_MIPI_PANEL_DETECT),y)

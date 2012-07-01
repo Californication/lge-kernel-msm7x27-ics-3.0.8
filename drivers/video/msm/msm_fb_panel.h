@@ -193,4 +193,6 @@ int lcdc_device_register(struct msm_panel_info *pinfo);
 int mddi_toshiba_device_register(struct msm_panel_info *pinfo,
 					u32 channel, u32 panel);
 
+int mddi_samsung_device_register(struct msm_panel_info *pinfo);
+
 #endif /* MSM_FB_PANEL_H */
