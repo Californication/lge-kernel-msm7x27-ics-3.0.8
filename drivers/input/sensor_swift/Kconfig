@@ -1,0 +1,38 @@
+#
+# Sensor driver configuration
+#
+menuconfig INPUT_SENSOR
+	bool "Sensors"
+	help
+	  Say Y here, and a list of supported touchscreens will be displayed.
+	  This option doesn't affect the kernel.
+
+	  If unsure, say Y.
+
+if INPUT_SENSOR
+
+config SENSOR_BMA150_SWIFT
+	tristate "BMA150 based accelerometer sensor"
+	help
+	  Say Y here if you have a sensor interface using the
+	  BMA150 controller, and your board-specific
+	  setup code includes i2c devices.
+
+	  If unsure, say N (but it's safe to say "Y").
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ads7846.
+	  
+config SENSOR_AK8973_SWIFT
+	tristate "AK8973 based ecompass sensor"
+	help
+	  Say Y here if you have a sensor interface using the
+	  AK8973 controller, and your board-specific
+	  setup code includes i2c devices.
+
+	  If unsure, say N (but it's safe to say "Y").
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ads7846.
+
+endif

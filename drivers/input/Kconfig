@@ -187,6 +187,9 @@ source "drivers/input/misc/Kconfig"
 #LGE_CHANGE_S : seven.kim@lge.com kernel3.0 porting
 source "drivers/input/sensor/Kconfig"
 #LGE_CHANGE_E : seven.kim@lge.com kernel3.0 porting
+
+source "drivers/input/sensor_swift/Kconfig"
+
 endif
 
 menu "Hardware I/O ports"
