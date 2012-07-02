@@ -214,7 +214,7 @@ static int bma150_close(struct inode *inode, struct file *file)
 
 
 /*	ioctl command for BMA150 device file	*/
-static int bma150_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
+static long bma150_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
 	int err = 0;
 	unsigned char data[6];
@@ -882,7 +882,7 @@ static const struct file_operations bma150_fops = {
 	.write = bma150_write,
 	.open = bma150_open,
 	.release = bma150_close,
-	.ioctl = bma150_ioctl,
+	.unlocked_ioctl = bma150_ioctl,
 };
 
 static int bma150_init_chip(struct i2c_client *client)

@@ -297,7 +297,7 @@ void apply_cal_data(int *cal_data) {
 
 }
 
-static int touch_cal_ioctl(struct inode *inode, struct file *file, unsigned int cmd,unsigned long arg) {
+static long touch_cal_ioctl(struct file *file, unsigned int cmd,unsigned long arg) {
 
 	/*void __user *argp = (void __user *)arg;*/
 	int cal_data[8] = {0, };
@@ -348,7 +348,7 @@ static struct file_operations touch_cal_fops = {
 	.owner	  = THIS_MODULE,
 	.open	  = touch_cal_open,
 	.release  = touch_cal_release,
-	.ioctl	  = touch_cal_ioctl,
+	.unlocked_ioctl	  = touch_cal_ioctl,
 };
 
 static struct miscdevice touch_cal_misc_device = {

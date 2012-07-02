@@ -26,6 +26,7 @@
 #include <linux/slab.h>
 #include <linux/rt9393_bl.h>
 #include <linux/device.h>
+#include <linux/sched.h>
 #if defined(CONFIG_RT9393_SYS_DEBUG)
 #include <linux/fs.h>
 #endif

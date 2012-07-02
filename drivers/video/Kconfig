@@ -2325,6 +2325,17 @@ config FB_PRE_INIT_FB
 	  Select this option if display contents should be inherited as set by
 	  the bootloader.
 
+config FB_MSM_MDDI_SAMSUNG_COMMON
+	bool
+	select FB_MSM_MDDI
+	default n
+
+config FB_MSM_MDDI_SAMSUNG_INNOTEK_HVGA
+       bool "MDDI LG GT540 Swift(Optimus)"
+       select FB_MSM_MDDI_SAMSUNG_COMMON
+       ---help---
+         Support for MDDI LG GT540 Swift(Optimus) 
+
 config FB_MX3
 	tristate "MX3 Framebuffer support"
 	depends on FB && MX3_IPU
