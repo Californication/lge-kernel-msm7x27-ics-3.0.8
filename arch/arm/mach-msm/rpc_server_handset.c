@@ -566,6 +566,17 @@ static int __devinit hs_rpc_init(void)
 	int rc;
 
 	rc = hs_rpc_cb_init();
+
+#if defined(CONFIG_MACH_LGE) && !defined(CONFIG_MACH_MSM7X27_SWIFT)
+	if (rc) {
+		pr_err("%s: failed to initialize rpc client\n", __func__);
+		return rc;
+	}
+
+	rc = msm_rpc_create_server(&hs_rpc_server);
+	if (rc)
+		pr_err("%s: failed to create rpc server\n", __func__);
+#else
 	if (rc) {
 		pr_err("%s: failed to initialize rpc client, try server...\n",
 						__func__);
@@ -576,6 +587,7 @@ static int __devinit hs_rpc_init(void)
 			return rc;
 		}
 	}
+#endif
 
 	return rc;
 }

@@ -33,13 +33,14 @@
 #include <linux/switch.h>
 #include <linux/input.h>
 #include <linux/debugfs.h>
+#include <linux/slab.h>
 #include <asm/gpio.h>
 #include <asm/atomic.h>
 #include <mach/board.h>
 #include <mach/vreg.h>
 #include <mach/board_lge.h>
 
-#define DEBUG_H2W
+//#define DEBUG_H2W
 #ifdef DEBUG_H2W
 #define H2W_DBG(fmt, arg...) printk(KERN_INFO "[H2W] %s " fmt "\n", __FUNCTION__, ## arg)
 #else
@@ -68,7 +69,6 @@ struct h2w_info {
 
 	int gpio_detect;
 	int gpio_button_detect;
-	int gpio_mic_mode;
 
 	atomic_t btn_state;
 	int ignore_btn;
@@ -91,15 +91,13 @@ static ssize_t gpio_h2w_print_name(struct switch_dev *sdev, char *buf)
 		return sprintf(buf, "No Device\n");
 	case LGE_HEADSET:
 		return sprintf(buf, "Headset\n");
-    case LGE_NO_MIC_HEADSET:
-    return sprintf(buf, "Headset_no_mic\n");
 	}
 	return -EINVAL;
 }
 
 static void button_pressed(void)
 {
-	H2W_DBG("button_pressed\n");
+	H2W_DBG("");
 	
 	atomic_set(&hi->btn_state, 1);
 	input_report_key(hi->input, KEY_MEDIA, 1);
@@ -112,7 +110,7 @@ static void button_pressed(void)
 
 static void button_released(void)
 {
-	H2W_DBG("button_released\n");
+	H2W_DBG("");
 	
 	atomic_set(&hi->btn_state, 0);
 	input_report_key(hi->input, KEY_MEDIA, 0);
@@ -126,7 +124,6 @@ static void insert_headset(void)
 	H2W_DBG("");
 
 	hi->ignore_btn = !gpio_get_value(hi->gpio_button_detect);
-	H2W_DBG("hi->ignore_btn = %d\n", hi->ignore_btn);
 
     if(hi->ignore_btn)
    	{
@@ -163,7 +160,6 @@ static void remove_headset(void)
 	H2W_DBG("");
 	
 	input_report_switch(hi->input, SW_HEADPHONE_INSERT, 0);
-	gpio_set_value(hi->gpio_mic_mode, 0);
 	switch_set_state(&hi->sdev, NO_DEVICE);
 	input_sync(hi->input);
 
@@ -196,7 +192,7 @@ static void detection_work(struct work_struct *work)
 
 		return;
 	}
-	msleep(100);
+
 	cable_in1 = gpio_get_value(hi->gpio_detect);
 
 	if (cable_in1 == 1) {
@@ -217,15 +213,12 @@ static enum hrtimer_restart button_event_timer_func(struct hrtimer *data)
 // 4 pole headset eject->button key is detected
       && (1 == gpio_get_value(hi->gpio_detect))
 	) {
-		H2W_DBG("button_event_timer_func\n");
 		if (gpio_get_value(hi->gpio_button_detect)) {
-		H2W_DBG("button_event_timer_func:1\n");
 			if (hi->ignore_btn)
 				hi->ignore_btn = 0;
 			else if (atomic_read(&hi->btn_state))
 				button_released();
 		} else {
-			 H2W_DBG("button_event_timer_func:2\n");
 			if (!hi->ignore_btn && !atomic_read(&hi->btn_state))
 				button_pressed();
 		}
@@ -253,7 +246,6 @@ static irqreturn_t detect_irq_handler(int irq, void *dev_id)
 		value1 = gpio_get_value(hi->gpio_detect);
 		set_irq_type(hi->irq, value1 ?
 				IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH);
-
 		value2 = gpio_get_value(hi->gpio_detect);
 	} while (value1 != value2 && retry_limit-- > 0);
 
@@ -264,7 +256,6 @@ static irqreturn_t detect_irq_handler(int irq, void *dev_id)
 			|| switch_get_state(&hi->sdev) == LGE_NO_MIC_HEADSET
 		)
 			hi->ignore_btn = 1;
-		gpio_set_value(hi->gpio_mic_mode, 1);
 		/* Do the rest of the work in timer context */
 		hrtimer_start(&hi->timer, hi->debounce_time, HRTIMER_MODE_REL);
 		
@@ -287,15 +278,12 @@ static irqreturn_t button_irq_handler(int irq, void *dev_id)
 	int value1, value2;
 	int retry_limit = 10;
 
-	H2W_DBG("button_irq_handler\n");
+	H2W_DBG("");
 	do {
 		value1 = gpio_get_value(hi->gpio_button_detect);
-		H2W_DBG("button_irq_handler : value1 = %d\n", value1);
 		set_irq_type(hi->irq_btn, value1 ?
 				IRQF_TRIGGER_LOW : IRQF_TRIGGER_HIGH);
-		
 		value2 = gpio_get_value(hi->gpio_button_detect);
-		H2W_DBG("button_irq_handler : value2 = %d\n", value2);
 	} while (value1 != value2 && retry_limit-- > 0);
 
 	H2W_DBG("value2 = %d (%d retries)", value2, (10-retry_limit));
@@ -323,8 +311,8 @@ static int gpio_h2w_probe(struct platform_device *pdev)
 
 	hi->gpio_detect = pdata->gpio_detect;
 	hi->gpio_button_detect = pdata->gpio_button_detect;
-	hi->gpio_mic_mode = pdata->gpio_mic_mode;
 
+//	hi->sdev.name = "h2w";
 	hi->sdev.name = "h2w_headset";
 	hi->sdev.print_name = gpio_h2w_print_name;
 
@@ -338,19 +326,13 @@ static int gpio_h2w_probe(struct platform_device *pdev)
 		goto err_create_work_queue;
 	}
 
-	gpio_tlmm_config(GPIO_CFG(hi->gpio_detect, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 	ret = gpio_request(hi->gpio_detect, "h2w_detect");
 	if (ret < 0)
 		goto err_request_detect_gpio;
 
-	gpio_tlmm_config(GPIO_CFG(hi->gpio_button_detect, 0, GPIO_CFG_INPUT, GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
 	ret = gpio_request(hi->gpio_button_detect, "h2w_button");
 	if (ret < 0)
 		goto err_request_button_gpio;
-	gpio_tlmm_config(GPIO_CFG(hi->gpio_mic_mode, 0, GPIO_CFG_OUTPUT, GPIO_CFG_PULL_UP, GPIO_CFG_2MA), GPIO_CFG_ENABLE);
-	ret = gpio_request(hi->gpio_mic_mode, "h2w_mic_mode");
-	if (ret < 0)
-		goto err_request_mic_mode_gpio;
 
 	ret = gpio_direction_input(hi->gpio_detect);
 	if (ret < 0)
@@ -379,9 +361,6 @@ static int gpio_h2w_probe(struct platform_device *pdev)
 
 	ret = request_irq(hi->irq, detect_irq_handler,
 			  IRQF_TRIGGER_HIGH, "h2w_detect", NULL); 
-
-	
-
 	if (ret < 0)
 		goto err_request_detect_irq;
 
@@ -389,9 +368,6 @@ static int gpio_h2w_probe(struct platform_device *pdev)
 	set_irq_flags(hi->irq_btn, IRQF_VALID | IRQF_NOAUTOEN);
 	ret = request_irq(hi->irq_btn, button_irq_handler,
 			  IRQF_TRIGGER_LOW, "h2w_button", NULL);
-
-
-
 	if (ret < 0)
 		goto err_request_h2w_headset_button_irq;
 
@@ -434,8 +410,6 @@ err_set_detect_gpio:
 	gpio_free(hi->gpio_button_detect);
 err_request_button_gpio:
 	gpio_free(hi->gpio_detect);
-err_request_mic_mode_gpio:
-	gpio_free(hi->gpio_mic_mode);
 err_request_detect_gpio:
 	destroy_workqueue(g_detection_work_queue);
 err_create_work_queue:
@@ -464,7 +438,6 @@ static int gpio_h2w_remove(struct platform_device *pdev)
 }
 
 static struct platform_driver gpio_h2w_driver = {
-	.probe		= gpio_h2w_probe,
 	.remove		= gpio_h2w_remove,
 	.driver		= {
 		.name		= "gpio-h2w",
@@ -475,7 +448,7 @@ static struct platform_driver gpio_h2w_driver = {
 static int __init gpio_h2w_init(void)
 {
 	H2W_DBG("");
-	return platform_driver_register(&gpio_h2w_driver);
+	return platform_driver_probe(&gpio_h2w_driver, gpio_h2w_probe);
 }
 
 static void __exit gpio_h2w_exit(void)

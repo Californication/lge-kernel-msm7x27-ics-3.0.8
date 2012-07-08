@@ -89,4 +89,11 @@
 
 #define MSM_STRONGLY_ORDERED_PAGE  0xFA0F0000
 
+#if defined(CONFIG_MACH_LGE)
+/* vibrator for MN Register */
+#define MSM_WEB_BASE          IOMEM(0xEB00C000)
+#define MSM_WEB_PHYS          0xA9D00040
+#define MSM_WEB_SIZE          SZ_4K
+#endif
+
 #endif

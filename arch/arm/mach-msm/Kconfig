@@ -378,7 +378,6 @@ config MACH_MSM7X27_FFA
 	help
 	  Support for the Qualcomm MSM7x27 FFA eval board.
 
-
 #LGE_CHANGE_S : seven.kim@lge.com kernel3.0 porting
 #MACH_MSM7625A_SURF/MACH_MSM7625A_FFA/MACH_MSM7627A_QRD1 was setted to yes in .config
 #So, temporally blocked all configs in this Kconfig file
@@ -711,6 +710,7 @@ config MSM_STACKED_MEMORY
 
 config PHYS_OFFSET
 	hex
+	default "0x00200000" if MACH_MSM7X27_SWIFT
 	default "0x40800000" if ARCH_MSM9615
 	default "0x80200000" if ARCH_APQ8064
 	default "0x80200000" if ARCH_MSM8960

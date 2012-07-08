@@ -1778,10 +1778,11 @@ static unsigned pcb_version;
 static unsigned chg_curr_volt;
 static unsigned batt_therm;
 static unsigned batt_volt_raw;
+#ifdef CONFIG_MACH_MSM7X27_UNIVA
 static unsigned chg_stat_reg;
 static unsigned chg_en_reg;
 static unsigned batt_id;
-
+#endif
 
 static ssize_t msm_batt_batt_volt_show(struct device* dev, struct device_attribute* attr, char* buf)
 {
@@ -1825,6 +1826,7 @@ static ssize_t msm_batt_batt_volt_raw_show(struct device* dev, struct device_att
 }
 static DEVICE_ATTR(batt_volt_raw, S_IRUGO, msm_batt_batt_volt_raw_show, NULL);
 
+#ifdef CONFIG_MACH_MSM7X27_UNIVA
 static ssize_t msm_batt_chg_stat_reg_show(struct device* dev, struct device_attribute* attr, char* buf)
 {
 	chg_stat_reg = lge_get_chg_stat_reg();
@@ -1853,6 +1855,8 @@ static ssize_t msm_batt_frst_show(struct device* dev, struct device_attribute* a
 	return sprintf(buf,"%s\n", get_frst_mode());
 }
 static DEVICE_ATTR(frst, S_IRUGO, msm_batt_frst_show, NULL);
+#endif
+
 static struct attribute* dev_attrs_lge_batt_info[] = {
 	&dev_attr_batt_volt.attr,
 	&dev_attr_chg_therm.attr,
@@ -1860,10 +1864,12 @@ static struct attribute* dev_attrs_lge_batt_info[] = {
 	&dev_attr_chg_curr_volt.attr,
 	&dev_attr_batt_therm.attr,
 	&dev_attr_batt_volt_raw.attr,
+#ifdef CONFIG_MACH_MSM7X27_UNIVA
 	&dev_attr_chg_stat_reg.attr,
 	&dev_attr_chg_en_reg.attr,
 	&dev_attr_batt_id.attr,
 	&dev_attr_frst.attr,
+#endif
 	NULL,
 };
 
@@ -2055,7 +2061,7 @@ static int __devinit msm_batt_init_rpc(void)
 
 	msm_batt_info.chg_ep =
 		msm_rpc_connect_compatible(CHG_RPC_PROG, CHG_RPC_VER_4_1, 0);
-	msm_batt_info.chg_api_version =  CHG_RPC_VER_4_1;
+	    msm_batt_info.chg_api_version =  CHG_RPC_VER_4_1;
 	if (msm_batt_info.chg_ep == NULL) {
 		pr_err("%s: rpc connect CHG_RPC_PROG = NULL\n", __func__);
 		return -ENODEV;

@@ -20,7 +20,7 @@
 #include <mach/board_lge.h>
 #include "../proc_comm.h"
 
-#if 1 //#if defined(CONFIG_LGE_DETECT_PIF_PATCH)
+#if 1 //defined(CONFIG_LGE_DETECT_PIF_PATCH)
 unsigned lge_get_pif_info(void)
 {
 	int err;
@@ -176,7 +176,7 @@ unsigned lge_get_batt_volt_raw(void)
 }
 EXPORT_SYMBOL(lge_get_batt_volt_raw);
 
-#if 1 //#ifdef CONFIG_MACH_MSM7X27_GELATO
+#if 1 //CONFIG_MACH_MSM7X27_UNIVA
 unsigned lge_get_chg_stat_reg(void)
 {
 	int err;
@@ -264,23 +264,4 @@ unsigned lge_get_nv_qem(void)
 	return ret;
 }
 EXPORT_SYMBOL(lge_get_nv_qem);
-
-unsigned lge_get_batt_id(void)
-{
-	int err;
-	unsigned ret = 0;
-	unsigned cmd = 0x4;
-	
-	err = msm_proc_comm(PCOM_CUSTOMER_CMD2, &ret, &cmd);
-	if (err < 0) {
-		pr_err("%s: msm_proc_comm(PCOM_CUSTOMER_CMD2) failed. cmd(%d)\n",
-		       __func__, cmd);
-		return err;
-	}
-
-	return ret;
-}
-EXPORT_SYMBOL(lge_get_batt_id);
-
-
 #endif
