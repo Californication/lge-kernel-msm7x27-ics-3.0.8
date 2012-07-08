@@ -129,6 +129,32 @@ msmsdcc_print_status(struct msmsdcc_host *host, char *hdr, uint32_t status)
 }
 #endif
 
+struct early_suspend dhdpm;
+EXPORT_SYMBOL(dhdpm);
+
+void register_mmc_card_pm(struct early_suspend *cardpm)
+{
+	if((cardpm != NULL) && (cardpm->suspend !=NULL) && (cardpm->resume != NULL))
+	{
+		dhdpm.suspend = cardpm->suspend;
+		dhdpm.resume = cardpm->resume;
+		printk("%s: [WiFi] Callbacks registered successfully. \n",__FUNCTION__);
+	}
+	else
+		printk("%s: Error: Null pointer!! \n", __FUNCTION__);
+}
+
+EXPORT_SYMBOL(register_mmc_card_pm);
+
+void unregister_mmc_card_pm(void)
+{
+	printk("%s: [WIFI] Unregistering suspend/resume callbacks.  \n", __FUNCTION__);
+	dhdpm.suspend = NULL;
+	dhdpm.resume  = NULL;	
+}
+EXPORT_SYMBOL(unregister_mmc_card_pm);
+
+
 static void
 msmsdcc_start_command(struct msmsdcc_host *host, struct mmc_command *cmd,
 		      u32 c);

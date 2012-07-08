@@ -892,7 +892,7 @@ dhd_prot_stop(dhd_pub_t *dhd)
 extern dhd_pub_t * get_dhd_pub_from_dev(struct net_device *dev);
 int dhd_deep_sleep(struct net_device *dev, int flag)
 {
-	dhd_pub_t *dhd_pub = get_dhd_pub_from_dev(dev);
+	dhd_pub_t *dhd_pub = /* get_dhd_pub_from_dev */ (dev);
     char iovbuf[20] = {0};
     uint powervar   = 0;
 
