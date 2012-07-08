@@ -602,7 +602,7 @@ wl_iw_get_macaddr(
 	return error;
 }
 
-#if defined(CONFIG_BRCM_LGE_WL_HOSTWAKEUP) //&& defined(CONFIG_BRCM_LGE_WL_ARPOFFLOAD)
+#if defined(CONFIG_BRCM_LGE_WL_HOSTWAKEUP) && defined(CONFIG_BRCM_LGE_WL_ARPOFFLOAD)
 /* LGE_CHANGE_s, [jisung.yang@lge.com], 2010-08-24, <Set listen interval and dtim listen> */
 uint wl_dtim_val = 0;		//by sjpark 100824
 
